@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XIT MÁXIMO | ELITE EDITION</title>
+    <style>
+        :root {
+            --red-neon: #ff1a1a;
+            --dark-core: #050505;
+            --gray-depth: #0f0f0f;
+            --text-primary: #fff;
+            --text-secondary: #aaa;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            outline: none;
+        }
+
+        body {
+            background: var(--dark-core);
+            color: var(--text-primary);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .background {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image:
+                linear-gradient(0deg, transparent 24%, rgba(255, 26, 26, .05) 25%, rgba(255, 26, 26, .05) 26%, transparent 27%, transparent 74%, rgba(255, 26, 26, .05) 75%, rgba(255, 26, 26, .05) 76%, transparent 77%, transparent),
+                linear-gradient(90deg, transparent 24%, rgba(255, 26, 26, .05) 25%, rgba(255, 26, 26, .05) 26%, transparent 27%, transparent 74%, rgba(255, 26, 26, .05) 75%, rgba(255, 26, 26, .05) 76%, transparent 77%, transparent);
+            background-size: 50px 50px;
+            animation: grid-scroll 20s linear infinite;
+            z-index: -1;
+        }
+
+        @keyframes grid-scroll {
+            0% {
+                background-position: 0 0;
+            }
+            100% {
+                background-position: 50px 50px;
+            }
+        }
+
+        .panel {
+            width: 380px;
+            padding: 40px;
+            background: rgba(15, 15, 15, 0.95);
+            border: 1px solid var(--red-neon);
+            border-radius: 12px;
+            box-shadow: 0 0 40px rgba(255, 26, 26, 0.3);
+            text-align: center;
+            backdrop-filter: blur(5px);
+            animation: panel-fade-in 0.5s ease-out;
+            position: relative;
+            z-index: 1;
+        }
+
+        @keyframes panel-fade-in {
+            0% {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            color: var(--red-neon);
+            font-weight: 800;
+            font-size: 30px;
+            letter-spacing: 4px;
+            margin-bottom: 5px;
+            text-shadow: 0 0 15px var(--red-neon);
+            text-transform: uppercase;
+        }
+
+        .version {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-bottom: 30px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        input {
+            width: 100%;
+            padding: 15px;
+            margin: 12px 0;
+            background: #000;
+            border: 1px solid #333;
+            color: var(--red-neon);
+            border-radius: 6px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            border-color: var(--red-neon);
+            box-shadow: 0 0 10px rgba(255, 26, 26, 0.2);
+        }
+
+        button {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #cc0000 0%, #ff1a1a 100%);
+            color: var(--text-primary);
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: transform 0.2s, box-shadow 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 10px rgba(255, 26, 26, 0.3);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(255, 26, 26, 0.5);
+        }
+
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 10px rgba(255, 26, 26, 0.3);
+        }
+
+        button:disabled {
+            background: #333;
+            color: #777;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .terminal {
+            background: #000;
+            border: 1px solid #222;
+            height: 130px;
+            margin-top: 25px;
+            font-size: 12px;
+            padding: 12px;
+            text-align: left;
+            overflow-y: auto;
+            color: #44eb44;
+            font-family: 'Consolas', 'Courier New', monospace;
+            border-radius: 6px;
+            border-left: 3px solid var(--red-neon);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .status-container {
+            font-size: 12px;
+            margin-bottom: 20px;
+            color: var(--text-secondary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #222;
+            padding-bottom: 10px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            color: white;
+            text-transform: uppercase;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 5px;
+            background-color: #222;
+            border-radius: 5px;
+            margin-top: 10px;
+            overflow: hidden;
+            display: none;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--red-neon);
+            width: 0%;
+            transition: width 0.1s linear;
+            box-shadow: 0 0 10px var(--red-neon);
+        }
+
+        .terminal::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .terminal::-webkit-scrollbar-track {
+            background: #000;
+        }
+
+        .terminal::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 5px;
+        }
+
+        .terminal::-webkit-scrollbar-thumb:hover {
+            background: #444;
+        }
+    </style>
+</head>
+<body>
+    <div class="background"></div>
+
+    <div id="login-box" class="panel">
+        <h1>XIT MÁXIMO</h1>
+        <div class="version">ELITE EDITION | INJEÇÃO DIRETA</div>
+        <input type="text" id="user" placeholder="LOGIN DE ELITE">
+        <input type="password" id="pass" placeholder="SENHA SECRETA">
+        <button onclick="auth()">INICIAR PROTOCOLO</button>
+    </div>
+
+    <div id="main-box" class="panel hidden">
+        <h1>XIT MÁXIMO</h1>
+        <div class="status-container">
+            <span>SISTEMA ADB/USB</span>
+            <span id="dev-status-badge" class="status-badge" style="background-color: #555;">AGUARDANDO</span>
+        </div>
+
+        <div style="font-size: 12px; text-align: left; color: #ccc; margin-bottom: 10px;">
+            <div>TARGET: <span style="color:var(--red-neon); font-weight:bold;">NECK LOCK (FIXO)</span></div>
+            <div>SENS: <span style="color:var(--red-neon); font-weight:bold;">ULTRA-LIGHT</span></div>
+        </div>
+
+        <button onclick="forceConnect()" style="background: #fff; color: #000;">1. PAREAR HARDWARE (USB)</button>
+        <button id="btn-inject" onclick="rawInjection()" disabled>2. ATIVAR TRAVA NO PESCOÇO</button>
+
+        <div class="terminal" id="output">
+            <span style="color:white;">$ System Booting...</span><br>
+            <span style="color:var(--text-secondary);">$ Kernel v1.0 [RAW INJECTION] Loaded.</span><br>
+            <span style="color:var(--red-neon);">$ Waiting for USB Connection...</span>
+        </div>
+        <div class="progress-bar" id="p-bar"><div class="progress-fill" id="p-fill"></div></div>
+    </div>
+
+    <script>
+        const CRED = { user: "maximo", pass: "xit" };
+        let usbDevice;
+
+        function log(msg, color = "#44eb44") {
+            const out = document.getElementById('output');
+            const time = new Date().toLocaleTimeString();
+            out.innerHTML += `<br><span style="color:${color}">[${time}] ${msg}</span>`;
+            out.scrollTop = out.scrollHeight;
+        }
+
+        function auth() {
+            const u = document.getElementById('user').value;
+            const p = document.getElementById('pass').value;
+            if (u === CRED.user && p === CRED.pass) {
+                document.getElementById('login-box').classList.add('hidden');
+                document.getElementById('main-box').classList.remove('hidden');
+            } else {
+                alert("ACESSO NEGADO! Verifique suas credenciais.");
+                document.getElementById('pass').value = '';
+            }
+        }
+
+        async function forceConnect() {
+            log("Iniciando Handshake de Hardware...", "#fff");
+            try {
+                usbDevice = await navigator.usb.requestDevice({ filters: [] });
+                await usbDevice.open();
+
+                log("Resetando Porta USB...", "#fff");
+                await usbDevice.reset();
+
+                if (usbDevice.configuration === null) await usbDevice.selectConfiguration(1);
+                await usbDevice.claimInterface(0);
+
+                const handshake = new Uint8Array([0x43, 0x4e, 0x4e, 0x58, 0x00, 0x00, 0x00, 0x01, 0x00, 0x10, 0x00, 0x00]);
+                await usbDevice.transferOut(1, handshake.buffer);
+
+                const badge = document.getElementById('dev-status-badge');
+                badge.innerText = "AUTORIZADO";
+                badge.style.backgroundColor = "#44eb44";
+                badge.style.color = "#000";
+
+                document.getElementById('btn-inject').disabled = false;
+                log("HARDWARE PAREADO: " + usbDevice.productName, "#44eb44");
+                log("!!! ACEITE A CHAVE RSA NO CELULAR !!!", "var(--red-neon)");
+            } catch (err) {
+                log("ERRO CRÍTICO: " + err.message, "var(--red-neon)");
+                log("Solução: Reconecte o cabo e tente novamente.", "var(--text-secondary)");
+            }
+        }
+
+        function rawInjection() {
+            const btn = document.getElementById('btn-inject');
+            const pBar = document.getElementById('p-bar');
+            const pFill = document.getElementById('p-fill');
+
+            btn.disabled = true;
+            pBar.style.display = 'block';
+            log("Iniciando injeção bruta de memória...", "#fff");
+
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 5;
+                pFill.style.width = progress + '%';
+
+                if (progress === 30) log("Localizando 'Neck_Lock_Fixation'...", "var(--text-secondary)");
+                if (progress === 60) log("Aplicando patch de sensibilidade...", "var(--text-secondary)");
+                if (progress === 90) log("Verificando integridade da injeção...", "var(--text-secondary)");
+
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        log("------------------------------------", "#fff");
+                        log("XIT MÁXIMO ATIVADO: TRAVA NO PESCOÇO ATIVA!", "var(--red-neon)");
+                        alert("PROTOCOLO FINALIZADO! A mira travará no pescoço. Puxe levemente para o FULL VERMELHO.");
+                        pBar.style.display = 'none';
+                        pFill.style.width = '0%';
+                        btn.disabled = false;
+                    }, 300);
+                }
+            }, 100);
+        }
+    </script>
+</body>
+</html>
