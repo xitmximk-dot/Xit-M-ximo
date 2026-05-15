@@ -238,7 +238,7 @@
     <div id="main-box" class="panel hidden">
         <h1>XIT C5</h1>
         <div class="status-container">
-            <span>SISTEMA ADB/USB</span>
+            <span>SISTEMA ADB</span>
             <span id="dev-status-badge" class="status-badge" style="background-color: #555;">AGUARDANDO</span>
         </div>
 
@@ -247,7 +247,9 @@
             <div>SENS: <span style="color:var(--red-neon); font-weight:bold;">ULTRA-LIGHT</span></div>
         </div>
 
-        <button onclick="forceConnect()" style="background: #fff; color: #000;">1. PAREAR HARDWARE (USB)</button>
+        <input type="text" id="wifi-ip" placeholder="192.168.1.42:5555" style="margin-top: 10px;" />
+        <button onclick="connectWifi()" style="background: #fff; color: #000;">1. PAREAR VIA WIFI (ADB)</button>
+        <button onclick="forceConnect()" style="background: #fff; color: #000;">1a. PAREAR HARDWARE (USB)</button>
         <button id="btn-inject" onclick="rawInjection()" disabled>2. ATIVAR TRAVA NO PESCOÇO</button>
         <button id="btn-aimlock" onclick="ativarAimlock()" disabled>AIMLOCK C5</button>
         <button id="btn-regedit" onclick="aplicarRegedit()" disabled>REGEDIT VIP</button>
@@ -265,6 +267,7 @@
     <script>
         const CRED = { user: "maximo", pass: "xit" };
         let usbDevice;
+        let connectedOverWifi = false;
 
         function log(msg, color = "#44eb44") {
             const out = document.getElementById('output');
@@ -301,7 +304,7 @@
                 await usbDevice.transferOut(1, handshake.buffer);
 
                 const badge = document.getElementById('dev-status-badge');
-                badge.innerText = "AUTORIZADO";
+                badge.innerText = "USB AUTORIZADO";
                 badge.style.backgroundColor = "#44eb44";
                 badge.style.color = "#000";
 
@@ -313,6 +316,21 @@
                 log("ERRO CRÍTICO: " + err.message, "var(--red-neon)");
                 log("Solução: Reconecte o cabo e tente novamente.", "var(--text-secondary)");
             }
+        }
+
+        function connectWifi() {
+            const ipField = document.getElementById('wifi-ip');
+            const target = ipField.value.trim() || '192.168.1.42:5555';
+            log(`Tentando parear via Wi-Fi em ${target}...`, "#fff");
+            setTimeout(() => {
+                connectedOverWifi = true;
+                document.getElementById('dev-status-badge').innerText = 'WIFI CONNECTED';
+                document.getElementById('dev-status-badge').style.backgroundColor = '#44eb44';
+                document.getElementById('dev-status-badge').style.color = '#000';
+                enableC5Buttons();
+                log(`Wi-Fi pareado com sucesso em ${target}.`, '#44eb44');
+                log('Simulação ativa: comandos ADB agora estão prontos para disparo.', '#aaa');
+            }, 900);
         }
 
         function enableC5Buttons() {
