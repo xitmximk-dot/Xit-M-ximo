@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>maximo c6</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    :root {
+      --bg: #121212;
+      --card: #1e1e1e;
+      --muted: #333;
+      --accent-on: #00ff66;
+      --accent-off: #ff3333;
+      --text: #fff;
+      --radius: 8px;
+    }
+    html,body { height:100%; margin:0; background:var(--bg); color:var(--text); font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; display:flex; align-items:center; justify-content:center; padding:20px; }
+    .card { background:var(--card); padding:20px; border-radius:var(--radius); width:100%; max-width:420px; box-shadow:0 6px 18px rgba(0,0,0,.5); }
+    h2 { margin:0 0 12px 0; font-size:1.25rem; }
+    label { display:block; margin-bottom:8px; font-size:.95rem; color:#ddd; }
+    select { padding:10px; width:100%; background:var(--muted); color:var(--text); border:1px solid #444; border-radius:6px; font-size:1rem; }
+    .controls { margin-top:16px; display:flex; gap:8px; align-items:center; }
+    button { padding:10px 14px; cursor:pointer; border:none; border-radius:6px; font-weight:600; }
+    .btn-active { background:var(--accent-on); color:#000; }
+    .btn-inactive { background:var(--accent-off); color:#fff; }
+    .status { font-size:.9rem; margin-left:8px; color:#ccc; }
+  </style>
+</head>
+<body>
+  <main class="card" role="region" aria-labelledby="tituloPainel">
+    <h2 id="tituloPainel">maximo c6</h2>
+
+    <label for="zonaSelecao">Selecionar Região de Análise:</label>
+    <select id="zonaSelecao" aria-describedby="descricaoZona">
+      <option value="SUPERIOR">Zona Superior (Cabeça)</option>
+      <option value="CENTRAL" selected>Zona Central (Pescoço/Peito)</option>
+      <option value="INFERIOR">Zona Inferior (Tronco)</option>
+    </select>
+
+    <div class="controls">
+      <button id="btnAlternar" class="btn-inactive" aria-pressed="false" aria-live="polite">STATUS: DESATIVADO</button>
+      <div class="status" id="statusTexto">Inativo</div>
+    </div>
+  </main>
+
+  <script>
+    class PainelControle {
+      constructor({ onStatusChange } = {}) {
+        this.isAtivo = false;
+        this.zonaAlvo = 'CENTRAL';
+        this.loopId = null;
+        this.onStatusChange = typeof onStatusChange === 'function' ? onStatusChange : () => {};
+      }
+
+      definirZona(novaZona) {
+        if (typeof novaZona === 'string') {
+          this.zonaAlvo = novaZona;
+          console.log(`🎯 Região de análise atualizada para: ${this.zonaAlvo}`);
+        }
+      }
+
+      alternarPainel() {
+        this.isAtivo = !this.isAtivo;
+        if (this.isAtivo) this.iniciarLoop();
+        else this.pararLoop();
+        this.onStatusChange(this.isAtivo, this.zonaAlvo);
+        return this.isAtivo;
+      }
+
+      iniciarLoop() {
+        console.log('🚀 Loop de sincronização iniciado.');
+        const executarCiclo = () => {
+          if (!this.isAtivo) return;
+          this.processarDadosRegiao();
+          this.loopId = requestAnimationFrame(executarCiclo);
+        };
+        if (!this.loopId) this.loopId = requestAnimationFrame(executarCiclo);
+      }
+
+      pararLoop() {
+        this.isAtivo = false;
+        if (this.loopId) {
+          cancelAnimationFrame(this.loopId);
+          this.loopId = null;
+        }
+        console.log('🛑 Loop de sincronização encerrado.');
+      }
+
+      processarDadosRegiao() {
+        const timestamp = new Date().toISOString();
+        console.debug(`✉️ [${timestamp}] Processando zona: ${this.zonaAlvo}`);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const btnAlternar = document.getElementById('btnAlternar');
+      const zonaSelecao = document.getElementById('zonaSelecao');
+      const statusTexto = document.getElementById('statusTexto');
+
+      const painel = new PainelControle({
+        onStatusChange: (ativo, zona) => {
+          btnAlternar.textContent = ativo ? 'STATUS: ATIVADO' : 'STATUS: DESATIVADO';
+          btnAlternar.className = ativo ? 'btn-active' : 'btn-inactive';
+          btnAlternar.setAttribute('aria-pressed', String(ativo));
+          statusTexto.textContent = ativo ? `Ativo — Zona: ${zona}` : 'Inativo';
+        }
+      });
+
+      painel.definirZona(zonaSelecao.value);
+
+      zonaSelecao.addEventListener('change', (e) => {
+        painel.definirZona(e.target.value);
+        if (painel.isAtivo) {
+          statusTexto.textContent = `Ativo — Zona: ${painel.zonaAlvo}`;
+        }
+      });
+
+      btnAlternar.addEventListener('click', () => {
+        painel.alternarPainel();
+      });
+    });
+  </script>
+</body>
+</html>
