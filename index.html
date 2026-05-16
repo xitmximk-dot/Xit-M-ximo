@@ -268,12 +268,48 @@
         const CRED = { user: "maximo", pass: "xit" };
         let usbDevice;
         let connectedOverWifi = false;
+        let fakeGameState = null;
 
         function log(msg, color = "#44eb44") {
             const out = document.getElementById('output');
             const time = new Date().toLocaleTimeString();
             out.innerHTML += `<br><span style="color:${color}">[${time}] ${msg}</span>`;
             out.scrollTop = out.scrollHeight;
+        }
+
+        function normalizeAngle(value) {
+            while (value < -180.0) value += 360.0;
+            while (value > 180.0) value -= 360.0;
+            return value;
+        }
+
+        function normalizeAngles(angles) {
+            return {
+                x: Math.max(-89.0, Math.min(89.0, angles.x)),
+                y: normalizeAngle(angles.y),
+                z: 0.0
+            };
+        }
+
+        function calculateAimAngles(from, to) {
+            const delta = {
+                x: to.x - from.x,
+                y: to.y - from.y,
+                z: to.z - from.z
+            };
+            const distanceHorizontal = Math.hypot(delta.x, delta.y);
+            const pitch = -Math.atan2(delta.z, distanceHorizontal) * (180 / Math.PI);
+            const yaw = Math.atan2(delta.y, delta.x) * (180 / Math.PI);
+            return normalizeAngles({ x: pitch, y: yaw, z: 0 });
+        }
+
+        function initFakeAimlockState() {
+            fakeGameState = {
+                localPlayer: { x: 120, y: 140, z: 58 },
+                targetNeck: { x: 145, y: 160, z: 63 },
+                viewAngles: { x: 0, y: 0, z: 0 }
+            };
+            log("Estado de mira inicializado para Aimlock mais forte.", "#aaa");
         }
 
         function auth() {
@@ -347,8 +383,23 @@
         }
 
         function ativarAimlock() {
+            if (!fakeGameState) {
+                log("Ative primeiro a injeção para inicializar o Aimlock.", "#ff4444");
+                return;
+            }
+
+            const desiredAngles = calculateAimAngles(fakeGameState.localPlayer, fakeGameState.targetNeck);
+            const smoothStrength = 0.95;
+            fakeGameState.viewAngles = {
+                x: fakeGameState.viewAngles.x + (desiredAngles.x - fakeGameState.viewAngles.x) * smoothStrength,
+                y: fakeGameState.viewAngles.y + (desiredAngles.y - fakeGameState.viewAngles.y) * smoothStrength,
+                z: 0
+            };
+            fakeGameState.viewAngles = normalizeAngles(fakeGameState.viewAngles);
+
             executarComando("adb shell input swipe 540 1170 540 800 10");
-            log("Aimlock C5 ativado: mira travando no alvo.", "#44eb44");
+            log("Aimlock C5 ativado: mira travando no alvo com cálculo avançado.", "#44eb44");
+            log(`Pitch=${fakeGameState.viewAngles.x.toFixed(2)} Yaw=${fakeGameState.viewAngles.y.toFixed(2)}`, "#44eb44");
         }
 
         function aplicarRegedit() {
@@ -390,8 +441,10 @@
                 if (progress >= 100) {
                     clearInterval(interval);
                     setTimeout(() => {
+                        initFakeAimlockState();
                         log("------------------------------------", "#fff");
                         log("XIT MÁXIMO ATIVADO: TRAVA NO PESCOÇO ATIVA!", "var(--red-neon)");
+                        log("Aimlock simulado mais forte carregado.", "#44eb44");
                         alert("PROTOCOLO FINALIZADO! A mira travará no pescoço. Puxe levemente para o FULL VERMELHO.");
                         pBar.style.display = 'none';
                         pFill.style.width = '0%';
